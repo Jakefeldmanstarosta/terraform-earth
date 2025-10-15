@@ -20,7 +20,6 @@ venv/
 *.h5
 *.zip
 *.geojson
-data/
 tmp/
     
 .idea/
