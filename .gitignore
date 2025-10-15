@@ -23,7 +23,7 @@ venv/
 *.geojson
 data/
 tmp/
-
+    
 .idea/
 .vscode/
 *.log
