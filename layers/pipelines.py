@@ -86,7 +86,7 @@ def add_pipeline_layer(map_obj):
             continue
         lat, lon = COUNTRY_COORDS[country]
         # normalize on a log scale for better visual balance
-        weight = np.log1p(count) / np.log1p(vmax)
+        weight = count / vmax
         heat_data.append([lat, lon, weight])
 
     # Gaussian-blurred intensity map
@@ -94,8 +94,8 @@ def add_pipeline_layer(map_obj):
         heat_data,
         min_opacity=0.3,
         max_opacity=0.9,
-        radius=35,  # blur spread
-        blur=30,    # softness of Gaussian kernel
+        radius=50,  # blur spread
+        blur=100,    # softness of Gaussian kernel
         gradient={
             0.0: "#033300",  # deep navy
             0.3: "#00b30f",  # rich blue
