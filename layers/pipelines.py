@@ -1,9 +1,8 @@
 import folium
 import numpy as np
-import matplotlib.cm as cm
+from folium.plugins import HeatMap
 
-#data is from https://docs.google.com/spreadsheets/d/1OYH6D7c-D0FsL5GzBGijtkmvQCTkBUclj-UVoOieUFo/edit?gid=2081466919#gid=2081466919
-# from the Global Energy Monitor: https://globalenergymonitor.org/projects/global-oil-infrastructure-tracker/
+# data from Global Energy Monitor: https://globalenergymonitor.org/projects/global-oil-infrastructure-tracker/
 PIPELINE_COUNTS = {
     "Argentina": 1709,
     "Australia": 1453,
@@ -74,23 +73,34 @@ COUNTRY_COORDS = {
 }
 
 def add_pipeline_layer(map_obj):
-    """Add proportional circles for number of operating pipelines per country."""
+    """Add blurred heatmap for number of operating pipelines per country."""
     vals = [v for v in PIPELINE_COUNTS.values() if v > 0]
+    if not vals:
+        return
+
     vmin, vmax = min(vals), max(vals)
-    cmap = cm.get_cmap("Blues")
+    heat_data = []
 
     for country, count in PIPELINE_COUNTS.items():
         if count == 0 or country not in COUNTRY_COORDS:
             continue
         lat, lon = COUNTRY_COORDS[country]
-        color = tuple((np.array(cmap((count - vmin) / (vmax - vmin))[:3]) * 255).astype(int))
-        color_hex = "#{:02x}{:02x}{:02x}".format(*color)
-        radius = 5 + 25 * (count - vmin) / (vmax - vmin)
-        folium.CircleMarker(
-            location=[lat, lon],
-            radius=radius,
-            color=color_hex,
-            fill=True,
-            fill_opacity=0.7,
-            popup=f"{country}: {count:,}km of pipelines",
-        ).add_to(map_obj)
+        # normalize on a log scale for better visual balance
+        weight = np.log1p(count) / np.log1p(vmax)
+        heat_data.append([lat, lon, weight])
+
+    # Gaussian-blurred intensity map
+    HeatMap(
+        heat_data,
+        min_opacity=0.3,
+        max_opacity=0.9,
+        radius=35,  # blur spread
+        blur=30,    # softness of Gaussian kernel
+        gradient={
+            0.0: "#033300",  # deep navy
+            0.3: "#00b30f",  # rich blue
+            0.6: "#33ff4e",  # mid-blue
+            0.8: "#66ff6b",  # lighter blue
+            1.0: "#b3ffb7",  # pale blue-white
+        },
+    ).add_to(map_obj)

@@ -7,7 +7,7 @@ from layers.co2 import get_country_co2_data, add_co2_layer
 
 
 st.set_page_config(layout="wide")
-st.title("Terraform Earth: Global Resource Layers")
+st.title("terraform earth.")
 
 # --- Sidebar / Layer selector ---
 st.sidebar.header("🌍 Layers")
@@ -27,8 +27,8 @@ if "Solar Irradiance" in layer_choices:
     st.info("Fetching (cached) NASA POWER solar data…")
 
     points = get_global_solar_points(
-        lat_step=10,
-        lon_step=10,
+        lat_step=20,
+        lon_step=20,
         progress_bar=progress_bar,
         progress_text=progress_text,
     )
@@ -44,6 +44,12 @@ if "Solar Irradiance" in layer_choices:
 if "Pipeline Network" in layer_choices:
     add_pipeline_layer(m)
     st.success("✅ Pipeline layer loaded.")
+
+if "CO₂ Emissions" in layer_choices:
+    st.info("Fetching CO₂ data from World Bank API…")
+    co2_df = get_country_co2_data()
+    add_co2_layer(m, co2_df)
+    st.success("✅ CO₂ emissions layer loaded.")
 
 # --- Add base controls and render ---
 folium.LayerControl().add_to(m)
