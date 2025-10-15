@@ -19,7 +19,6 @@ venv/
 *.hdf
 *.h5
 *.zip
-*.csv
 *.geojson
 data/
 tmp/
